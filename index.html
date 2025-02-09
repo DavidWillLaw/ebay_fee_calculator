@@ -70,14 +70,19 @@
                 }
 
                 let originalPrice;
-                const pricePerItem = numericFinal / numericQty;
+                const finalPricePerItem = numericFinal / numericQty;
 
-                if (pricePerItem <= 311.72) {
+                // Reverse engineer the original price based on the fee structure
+                if (finalPricePerItem <= 311.72) {
+                    // For prices where only the 4% fee applies
                     originalPrice = (numericFinal - 0.72) / 1.04;
-                } else if (pricePerItem <= 4080.72) {
-                    originalPrice = ((numericFinal - 0.72 - (300 * 0.04) + 0.03) / 1.02) + 300;
                 } else {
-                    originalPrice = numericFinal - 0.72 - (300 * 0.04) - ((4000-300) * 0.02) + 0.03;
+                    // For prices where both 4% and 2% fees apply
+                    // First £300 is charged at 4%, remainder at 2%
+                    const baseFee = (300 * 0.04) - 0.03; // Fee for first £300
+                    let remainingFinal = numericFinal - 0.75 - baseFee - 300;
+                    let remainingOriginal = remainingFinal / 1.02;
+                    originalPrice = 300 + remainingOriginal;
                 }
 
                 originalPrice = Number(originalPrice.toFixed(2));
@@ -138,7 +143,7 @@
                                 placeholder="Enter original price"
                             />
                         </div>
-                       
+                        
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-700">
                                 Final Price (£)
